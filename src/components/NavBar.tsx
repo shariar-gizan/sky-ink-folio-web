@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import ThemeToggle from "./ThemeToggle";
 
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -47,23 +48,28 @@ const NavBar = () => {
         </div>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex space-x-6">
+        <div className="hidden md:flex space-x-6 items-center">
           {navItems.map((item) => (
             <a key={item.name} href={item.href} className="nav-link">
               {item.name}
             </a>
           ))}
+          <div className="ml-4">
+            <ThemeToggle />
+          </div>
         </div>
 
         {/* Mobile Navigation Toggle */}
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="md:hidden" 
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          <Menu />
-        </Button>
+        <div className="flex items-center md:hidden gap-4">
+          <ThemeToggle />
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            <Menu />
+          </Button>
+        </div>
 
         {/* Mobile Navigation Menu */}
         <div 
