@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Menu } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import ThemeToggle from "./ThemeToggle";
@@ -8,6 +8,7 @@ import ThemeToggle from "./ThemeToggle";
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState("home");
 
   useEffect(() => {
     const handleScroll = () => {
@@ -17,6 +18,18 @@ const NavBar = () => {
       } else {
         setScrolled(false);
       }
+      
+      // Update active section based on scroll position
+      const sections = document.querySelectorAll("section[id]");
+      sections.forEach((section) => {
+        const sectionTop = (section as HTMLElement).offsetTop - 100;
+        const sectionHeight = (section as HTMLElement).offsetHeight;
+        const sectionId = section.getAttribute("id") || "";
+        
+        if (window.scrollY >= sectionTop && window.scrollY < sectionTop + sectionHeight) {
+          setActiveSection(sectionId);
+        }
+      });
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -36,6 +49,16 @@ const NavBar = () => {
     { name: 'Contact', href: '#contact' },
   ];
 
+  const handleNavClick = (href: string) => {
+    setIsOpen(false);
+    
+    // Smooth scroll to the section
+    const element = document.querySelector(href);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
     <nav 
       className={cn(
@@ -51,7 +74,18 @@ const NavBar = () => {
         {/* Desktop Navigation */}
         <div className="hidden md:flex space-x-6 items-center">
           {navItems.map((item) => (
-            <a key={item.name} href={item.href} className="nav-link">
+            <a 
+              key={item.name} 
+              href={item.href} 
+              className={cn(
+                "nav-link transition-all duration-300",
+                activeSection === item.href.substring(1) && "text-primary"
+              )}
+              onClick={(e) => {
+                e.preventDefault();
+                handleNavClick(item.href);
+              }}
+            >
               {item.name}
             </a>
           ))}
@@ -67,15 +101,16 @@ const NavBar = () => {
             variant="ghost" 
             size="icon" 
             onClick={() => setIsOpen(!isOpen)}
+            aria-label="Toggle menu"
           >
-            <Menu />
+            {isOpen ? <X /> : <Menu />}
           </Button>
         </div>
 
         {/* Mobile Navigation Menu */}
         <div 
           className={cn(
-            "fixed inset-0 bg-background/95 backdrop-blur-sm flex flex-col justify-center items-center md:hidden transition-opacity duration-300 z-50",
+            "fixed inset-0 bg-background/95 backdrop-blur-sm flex flex-col justify-center items-center md:hidden transition-all duration-300 z-50",
             isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
           )}
         >
@@ -86,10 +121,14 @@ const NavBar = () => {
                 href={item.href} 
                 className={cn(
                   "text-xl font-medium hover:text-primary transition-colors duration-300",
-                  isOpen && "animate-fade-in"
+                  isOpen && "animate-fade-in",
+                  activeSection === item.href.substring(1) && "text-primary"
                 )}
                 style={{ animationDelay: `${index * 0.1}s` }}
-                onClick={() => setIsOpen(false)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavClick(item.href);
+                }}
               >
                 {item.name}
               </a>
